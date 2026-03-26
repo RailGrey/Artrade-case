@@ -12,6 +12,7 @@ dependencies = [
     "lightgbm>=4.0.0",
     "shap>=0.45.0",
     "pyarrow>=23.0.1",
+    "pre-commit>=4.5.1",
 ]
 
 [dependency-groups]
