@@ -11,4 +11,6 @@ wheels/
 .venv_old
 AGENTS.md
 
-data
+#data/
+data/processed/
+data/raw/
