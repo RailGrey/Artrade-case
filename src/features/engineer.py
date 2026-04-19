@@ -96,25 +96,6 @@ def extract_discount_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def extract_dimensions_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Extract features from dimension columns."""
-    df = df.copy()
-
-    dim_cols = ["lead_Высота", "lead_Ширина", "lead_Длина"]
-    existing_dim_cols = [c for c in dim_cols if c in df.columns]
-
-    if len(existing_dim_cols) >= 2:
-        df["volume_approx"] = df[existing_dim_cols].prod(axis=1)
-        df["has_dimensions"] = df[existing_dim_cols].notna().all(axis=1).astype(int)
-
-    weight_cols = ["lead_Вес (грамм)*", "lead_Масса (гр)"]
-    existing_weight_cols = [c for c in weight_cols if c in df.columns]
-    if existing_weight_cols:
-        df["weight_combined"] = df[existing_weight_cols].bfill(axis=1).iloc[:, 0]
-
-    return df
-
-
 def create_utm_aggregates(df: pd.DataFrame) -> pd.DataFrame:
     """Create UTM-related aggregate features."""
     df = df.copy()
@@ -148,12 +129,19 @@ def add_all_features(df: pd.DataFrame) -> pd.DataFrame:
     df = extract_order_features(df)
     df = extract_product_categories(df)
     df = extract_discount_features(df)
-    df = extract_dimensions_features(df)
     df = add_geo_features(df)
     df = create_utm_aggregates(df)
     df = add_lead_qualification_features(df)
 
-    cols_to_drop = ["lead_Состав заказа", "contact_Адрес ПВЗ"]
+    cols_to_drop = [
+        "lead_Состав заказа",
+        "contact_Адрес ПВЗ",
+        "lead_Скидка",
+        "lead_utm_source",
+        "lead_utm_medium",
+        "contact_Город",
+        "lead_Статус заказа на сайте",
+    ]
     df = df.drop(columns=[c for c in cols_to_drop if c in df.columns], errors="ignore")
 
     return df
