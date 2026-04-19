@@ -7,7 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from src.config import (
-    MODEL_LGBM,
+    MODEL_CATBOOST,
     RAW_CSV,
     TARGET_COL,
     TEST_PARQUET,
@@ -37,7 +37,7 @@ from src.models.trainer import (
     get_feature_importance,
     save_model,
     train_baseline,
-    train_lgb_model,
+    train_catboost_model,
 )
 
 
@@ -80,21 +80,21 @@ def run_training() -> None:
     for name, value in cv_metrics.items():
         print(f"    {name}: {value:.4f}")
 
-    print("\n--- Main Model: LightGBM ---")
-    lgb_model, params, lgb_metrics = train_lgb_model(X_train, y_train, X_test, y_test)
-    for name, value in lgb_metrics.items():
+    print("\n--- Main Model: CatBoost ---")
+    catboost_model, params, catboost_metrics = train_catboost_model(X_train, y_train, X_test, y_test)
+    for name, value in catboost_metrics.items():
         print(f"  {name}: {value:.4f}")
 
-    cv_pred, cv_metrics = cross_validate_model(lgb_model, X_train, y_train)
+    cv_pred, cv_metrics = cross_validate_model(catboost_model, X_train, y_train)
     print("\n  Cross-validation metrics:")
     for name, value in cv_metrics.items():
         print(f"    {name}: {value:.4f}")
 
-    save_model(lgb_model, MODEL_LGBM)
+    save_model(catboost_model, MODEL_CATBOOST)
 
     print("\n--- Feature Importance ---")
     feature_names = X_train.columns.tolist()
-    importance_df = get_feature_importance(lgb_model, feature_names)
+    importance_df = get_feature_importance(catboost_model, feature_names)
     print(importance_df.head(10).to_string(index=False))
 
 
@@ -106,10 +106,10 @@ def run_evaluation() -> None:
 
     X_train, X_test, y_train, y_test = load_processed_data()
 
-    lgb_model, params, _ = train_lgb_model(X_train, y_train, X_test, y_test)
+    catboost_model, params, _ = train_catboost_model(X_train, y_train, X_test, y_test)
 
-    y_pred_proba = lgb_model.predict_proba(X_test)[:, 1]
-    y_pred = lgb_model.predict(X_test)
+    y_pred_proba = catboost_model.predict_proba(X_test)[:, 1]
+    y_pred = catboost_model.predict(X_test)
 
     print_classification_summary(y_test, y_pred, y_pred_proba)
 
@@ -117,7 +117,7 @@ def run_evaluation() -> None:
     plot_confusion_matrix(y_test, y_pred)
     plot_threshold_analysis(y_test, y_pred_proba)
 
-    importance_df = get_feature_importance(lgb_model, X_train.columns.tolist())
+    importance_df = get_feature_importance(catboost_model, X_train.columns.tolist())
     plot_feature_importance(importance_df)
 
     errors = analyze_errors(X_test, y_test, y_pred, y_pred_proba)

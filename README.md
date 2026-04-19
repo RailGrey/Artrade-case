@@ -44,20 +44,18 @@ artrade/
 
 | Модель | AUC-ROC (CV) | F1 (CV) |
 |--------|---------------|----------|
-| Logistic Regression (baseline) | 0.629 | 0.635 |
-| **RandomForest** (fallback*) | **0.935** | **0.945** |
-
-*LightGBM недоступен (требуется libgomp1)
+| Logistic Regression (baseline) | 0.628 | 0.636 |
+| **CatBoost** | **0.959** | **0.952** |
 
 ## Метрики на тестовой выборке
 
 | Метрика | Значение |
 |---------|----------|
-| AUC-ROC | 0.947 |
-| Precision | 0.977 |
-| Recall | 0.926 |
-| F1 | 0.951 |
-| Accuracy | 0.922 |
+| AUC-ROC | 0.964 |
+| Precision | 0.981 |
+| Recall | 0.914 |
+| F1 | 0.946 |
+| Accuracy | 0.914 |
 
 ## Ключевые признаки
 
@@ -106,5 +104,5 @@ uv run jupyter notebook notebooks/results.ipynb
 - matplotlib >= 3.8.0
 - seaborn >= 0.13.0
 - scikit-learn >= 1.4.0
-- lightgbm >= 4.0.0
+- catboost >= 1.2
 - shap >= 0.45.0
