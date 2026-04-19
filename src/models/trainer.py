@@ -11,7 +11,7 @@ from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_sco
 from sklearn.model_selection import StratifiedKFold, cross_val_predict
 from sklearn.preprocessing import StandardScaler
 
-from src.config import MODEL_BASELINE, MODEL_LGBM, N_FOLDS, RANDOM_STATE
+from src.config import MODEL_BASELINE, MODEL_CATBOOST, N_FOLDS, RANDOM_STATE
 
 
 def train_baseline(
@@ -70,44 +70,35 @@ def cross_validate_model(
     return y_pred_proba, metrics
 
 
-def train_lgb_model(
+def train_catboost_model(
     X_train: pd.DataFrame,
     y_train: pd.Series,
     X_val: pd.DataFrame | None = None,
     y_val: pd.Series | None = None,
     params: dict | None = None,
 ) -> tuple[Any, dict[str, Any], dict[str, float]]:
-    """Train LightGBM model."""
-    try:
-        import lightgbm as lgb
-    except (ImportError, OSError) as e:
-        print(f"LightGBM not available ({e}). Falling back to RandomForest.")
-        return train_random_forest(X_train, y_train, X_val, y_val, params)
+    """Train CatBoost model."""
+    from catboost import CatBoostClassifier
 
     if params is None:
         params = {
-            "objective": "binary",
-            "metric": "auc",
-            "boosting_type": "gbdt",
-            "num_leaves": 31,
+            "iterations": 300,
             "learning_rate": 0.05,
-            "feature_fraction": 0.8,
-            "bagging_fraction": 0.8,
-            "bagging_freq": 5,
-            "verbose": -1,
-            "random_state": RANDOM_STATE,
-            "n_estimators": 300,
-            "class_weight": "balanced",
+            "depth": 6,
+            "random_seed": RANDOM_STATE,
+            "verbose": False,
+            "auto_class_weights": "Balanced",
+            "eval_metric": "AUC",
         }
 
-    model = lgb.LGBMClassifier(**params)
+    model = CatBoostClassifier(**params)
 
     if X_val is not None and y_val is not None:
         model.fit(
             X_train,
             y_train,
-            eval_set=[(X_val, y_val)],
-            callbacks=[lgb.early_stopping(stopping_rounds=50, verbose=False)],
+            eval_set=(X_val, y_val),
+            early_stopping_rounds=50,
         )
     else:
         model.fit(X_train, y_train)
@@ -159,7 +150,7 @@ def train_random_forest(
     return model, params, metrics
 
 
-def save_model(model: Any, path: Path = MODEL_LGBM) -> None:
+def save_model(model: Any, path: Path = MODEL_CATBOOST) -> None:
     """Save trained model to file."""
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "wb") as f:
@@ -167,7 +158,7 @@ def save_model(model: Any, path: Path = MODEL_LGBM) -> None:
     print(f"Model saved to {path}")
 
 
-def load_model(path: Path = MODEL_LGBM) -> Any:
+def load_model(path: Path = MODEL_CATBOOST) -> Any:
     """Load trained model from file."""
     with open(path, "rb") as f:
         model = pickle.load(f)

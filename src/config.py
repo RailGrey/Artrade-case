@@ -17,7 +17,7 @@ TEST_PARQUET = PROCESSED_DATA_DIR / "test.parquet"
 CLEANED_PARQUET = PROCESSED_DATA_DIR / "cleaned.parquet"
 
 MODEL_BASELINE = MODELS_DIR / "baseline_logreg.pkl"
-MODEL_LGBM = MODELS_DIR / "lgbm_model.pkl"
+MODEL_CATBOOST = MODELS_DIR / "catboost_model.pkl"
 
 RANDOM_STATE = 42
 TEST_SIZE = 0.2
