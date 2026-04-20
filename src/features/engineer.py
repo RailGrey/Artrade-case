@@ -141,6 +141,7 @@ def add_all_features(df: pd.DataFrame) -> pd.DataFrame:
         "lead_utm_medium",
         "contact_Город",
         "lead_Статус заказа на сайте",
+        "contact_LTV",
     ]
     df = df.drop(columns=[c for c in cols_to_drop if c in df.columns], errors="ignore")
 
